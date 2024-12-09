@@ -649,3 +649,27 @@ For each of these wrappers, make sure you fill in the appropriate variables at t
 * [align\_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and
   contigs
 * [merge\_atac\_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats
+
+## 7. Custom analysis
+
+If you have a bunch of outputs from the atac-seq pipeline performed on all tissues but interested in generating tissue specific consensus merged peak * counts matrix. Below steps will help you achieve the goal.
+
+```bash
+1. Generate a list of Peak files for the specific tissue of interest on which the consensus peak * counts matrix needs to be generated. Below is an example for lung
+ls ~/test_mnt/pass1ac-06/Output/final/peak/Rat-Lung*overlap.optimal_peak.narrowPeak.gz >lung_list.txt
+
+2. Generate output folder
+mkdir -p ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks
+
+3. Combine the peaks, truncate the peaks and merge all the peaks to perform the consensus peak matrix
+for i in `cat lung_list.txt`;do cat $i >>~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.bed.gz;done
+python3 ~/motrpac-atac-seq-pipeline/src/truncate_narrowpeak_200bp_summit.py \
+--infile ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.bed.gz \
+--outfile ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.bed.gz
+zcat ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.bed.gz | bedtools sort | bedtools merge > ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed
+
+4. Generate the final consensus peaks * counts matrix for your tissue of interest, lung in this case
+bash encode_to_count_matrix_split_by_tissue.sh ~/test_mnt/PASS/atac-seq/rn7 ~/motrpac-atac-seq-pipeline/src `pwd`/batch.txt 3 pass1ac-06/Output/split_by_tissue/lung 0 &>pass1ac-06_rn7_counts_lung.txt
+
+```
+

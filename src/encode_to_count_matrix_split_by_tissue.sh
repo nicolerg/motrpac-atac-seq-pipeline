@@ -45,7 +45,7 @@ mkdir -p ${indir}/${final_results_dir}/counts_matrix
 intersect_tag () {
 	local tag=$1
 	#change below
-	local results_dir="/home/araja7/test_mnt/PASS/atac-seq/rn7/pass1ac-06/Output/test_split_by_tissue/lung" #assumes the results folder has the word final
+	local results_dir="/home/araja7/test_mnt/pass1ac-06/Output/test_split_by_tissue/lung" #assumes the results folder has the word final
 	#below loction was used for pass1ac
 	#local results_dir=$(ls|grep "pass1c_merged_counts_v2")
 	echo "results dir is" ${results_dir}
@@ -58,7 +58,7 @@ export -f intersect_tag
 
 for i in `cat ${batch_file}`;do
 	#tag_align=$(ls ${indir}/$i/Output/final/tagalign/*68??_R1*tagAlign.gz)
-	#modify the below to match with the tissue
+	#change below to match with the exact tissue code
 	tag_align=$(ls ${indir}/$i/Output/final/tagalign/*66??_R1*tagAlign.gz)
 	echo ${tag_align}
 	echo ${final_results_dir}

@@ -72,6 +72,10 @@ of environment.
 5. [Flag problematic samples](#5-flag-problematic-samples)
 
 6. [Pipeline post-processing scripts](#6-pipeline-post-processing-scripts)
+  
+    6.1 Generate consensus merged peak * count matrix for all tissues combined
+    
+    6.2 Generate tissue-specific consensus merged peak * count matrix
 
 ## 1. Prepare ATAC-seq data for submission to the BIC
 
@@ -627,7 +631,7 @@ the [ENCODE ATAC-seq data standards](https://www.encodeproject.org/atac-seq/#sta
 
 Use the pipeline post-processing wrapper scripts to organize pipeline outputs, generate the QC report and  the final consensus peak by count matrix. 
 
-### 6.1. Generate consensus merged peak * count matrix for all tissues combined
+### 6.1 Generate consensus merged peak * count matrix for all tissues combined
  
 Below post-processing wrappers can be used to perform post-processing of the atac-seq pipeline outputs starting from data organization to generating the consensus peak*counts matrix for all tissues combined together in the animal and human study respectively. The purpose of generating consensus peak * counts matrix across all tissues together is to be able to have the same consesus merged peaks for comparison across all tissues. There will be peaks in the consensus peak matrix which are tissue specific and therefore have zero counts in other tissues but non-zero in the tissue in which the gene is expressed.
 

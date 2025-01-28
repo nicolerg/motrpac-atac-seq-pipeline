@@ -17,7 +17,7 @@ of environment.
 > **NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline **version 1.7.0** for consistency within the consortium and
 > reproducibilty outside of the consortium.
 
-* Important references: \*
+* **Important references:**
 
 * [GitHub repository for the ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline)
 
@@ -71,7 +71,7 @@ of environment.
 
 5. [Flag problematic samples](#5-flag-problematic-samples)
 
-6. [Pipeline post-processing](#6-post-processing-scripts)
+6. [Pipeline post-processing scripts](#6-pipeline-post-processing-scripts)
 
 ## 1. Prepare ATAC-seq data for submission to the BIC
 
@@ -627,9 +627,9 @@ the [ENCODE ATAC-seq data standards](https://www.encodeproject.org/atac-seq/#sta
 
 Use the pipeline post-processing wrapper scripts to organize pipeline outputs, generate the QC report and  the final consensus peak by count matrix. 
 
-### 6.1. Pipeline post-processing wrappers
+### 6.1. Generate consensus merged peak * count matrix for all tissues combined
  
-Below wrappers can be used to generate the consensus peak*counts matrix for all tissues combined together
+Below post-processing wrappers can be used to perform post-processing of the atac-seq pipeline outputs starting from data organization to generating the consensus peak*counts matrix for all tissues combined together in the animal and human study respectively. The purpose of generating consensus peak * counts matrix across all tissues together is to be able to have the same consesus merged peaks for comparison across all tissues. There will be peaks in the consensus peak matrix which are tissue specific and therefore have zero counts in other tissues but non-zero in the tissue in which the gene is expressed.
 
 * [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix for PASS animal studies
 * [atac-seq-human-wrapper.sh](src/atac-post-porcess-human-wrapper.sh): wrapper script to generate QC report and final count matrix for human study
@@ -650,7 +650,7 @@ For each of these wrappers, make sure you fill in the appropriate variables at t
   contigs
 * [merge\_atac\_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats
 
-### 6.2 Custom analysis
+### 6.2 Generate tissue-specific consensus merged peak * count matrix
 
 If you have a bunch of outputs from the atac-seq pipeline performed on all tissues but interested in generating tissue specific consensus merged peak * counts matrix. Run the below steps instead of running it from the post-processing wrapper after organizing the pipeline outputs to generate consensus peak-count matrix for the tissue of interest.
 

@@ -631,8 +631,8 @@ Use the pipeline post-processing wrapper scripts to organize pipeline outputs, g
  
 Below post-processing wrappers can be used to perform post-processing of the atac-seq pipeline outputs starting from data organization to generating the consensus peak*counts matrix for all tissues combined together in the animal and human study respectively. The purpose of generating consensus peak * counts matrix across all tissues together is to be able to have the same consesus merged peaks for comparison across all tissues. There will be peaks in the consensus peak matrix which are tissue specific and therefore have zero counts in other tissues but non-zero in the tissue in which the gene is expressed.
 
-* [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix for PASS animal studies
-* [atac-seq-human-wrapper.sh](src/atac-post-porcess-human-wrapper.sh): wrapper script to generate QC report and final count matrix for human study
+* [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for PASS animal studies
+* [atac-seq-human-wrapper.sh](src/atac-post-porcess-human-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for human study
 
 For each of these wrappers, make sure you fill in the appropriate variables at the top of the script before running.
 

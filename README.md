@@ -17,7 +17,7 @@ of environment.
 > **NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline **version 1.7.0** for consistency within the consortium and
 > reproducibilty outside of the consortium.
 
-* Important references: \*
+* **Important references:**
 
 * [GitHub repository for the ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline)
 
@@ -71,7 +71,11 @@ of environment.
 
 5. [Flag problematic samples](#5-flag-problematic-samples)
 
-6. [Post-processing scripts](#6-post-processing-scripts)
+6. [Pipeline post-processing scripts](#6-pipeline-post-processing-scripts)
+  
+    6.1 Generate consensus merged peak * count matrix for all tissues combined
+    
+    6.2 Generate tissue-specific consensus merged peak * count matrix
 
 ## 1. Prepare ATAC-seq data for submission to the BIC
 
@@ -621,27 +625,27 @@ the [ENCODE ATAC-seq data standards](https://www.encodeproject.org/atac-seq/#sta
 | Number of peaks in `overlap` peak set < 80,000                                                                      | replication.reproducibility.overlap.N\_opt < 80000                | This is more relaxed than the ENCODE recommendation                                                                                                                  |
 | A nucleosome-free region is not present                                                                             | align.frag\_len\_stat.nfr\_peak\_exists == false                  | This should be enforced more strictly                                                                                                                                |
 | A mononucleosome peak is not present                                                                                | align.frag\_len\_stat.mono\_nuc\_peak\_exists == false            | This should be enforced more strictly                                                                                                                                |
-| TSS enrichment < ?                                                                                                  | align\_enrich.tss\_enrich.tss\_enrich                             | This cutoff needs to be evaluated retrospectively. We will probably have tissue-specific recommendations                                                             |
+| TSS enrichment < 4                                                                                                 | align\_enrich.tss\_enrich.tss\_enrich                             | This cutoff needs to be evaluated retrospectively. We will probably have tissue-specific recommendations                                                             |
 
-## 6. Post-processing scripts
+## 6. Pipeline post-processing scripts
 
-Use the post-processing wrapper scripts to generate the QC report and to generate the final count matrix.
+Use the pipeline post-processing wrapper scripts to organize pipeline outputs, generate the QC report and  the final consensus peak by count matrix. 
 
-* [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final
-  count matrix for PASS samples
-* [atac-seq-human-wrapper.sh](src/atac-post-porcess-human-wrapper.sh): wrapper script to generate QC report and final
-  count matrix for human samples
+### 6.1 Generate consensus merged peak * count matrix for all tissues combined
+ 
+Below post-processing wrappers can be used to perform post-processing of the atac-seq pipeline outputs starting from data organization to generating the consensus peak*counts matrix for all tissues combined together in the animal and human study respectively. The purpose of generating consensus peak * counts matrix across all tissues together is to be able to have the same consesus merged peaks for comparison across all tissues. There will be peaks in the consensus peak matrix which are tissue specific and therefore have zero counts in other tissues but non-zero in the tissue in which the gene is expressed.
+
+* [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for PASS animal studies
+* [atac-seq-human-wrapper.sh](src/atac-post-process-human-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for human study
 
 For each of these wrappers, make sure you fill in the appropriate variables at the top of the script before running.
 
-### 6.1. Individual scripts
+#### Individual scripts contained in the wrapper
 
 * [extract\_rep\_names\_from\_encode.sh](src/extract_rep_names_from_encode.sh): generate rep-to-viallabel map to
   interpret QC report
-* [pass\_extract\_atac\_from\_gcp.sh](src/pass_extract_atac_from_gcp.sh): download relevant files for PASS samples from
-  ENCODE output
-* [human\_extract\_atac\_from\_gcp.sh](src/extract_atac_from_gcp_human.sh): download relevant files for human samples
-  from ENCODE output
+* [extract\_atac\_from\_gcp\_pass.sh](src/extract_atac_from_gcp_pass.sh): download relevant files for PASS samples from ENCODE pipeline outputs
+* [human\_extract\_atac\_from\_gcp.sh](src/extract_atac_from_gcp_human.sh): download relevant files for human samples from ENCODE pipeline outputs
 * [encode\_to\_count\_matrix.sh](src/encode_to_count_matrix.sh): use `narrowkpeak.gz` and `tagAlign` files to generate a
   peak x sample raw counts matrix for PASS samples
 * [encode\_to\_count\_matrix_human.sh](src/encode_to_count_matrix_human.sh): use `narrowkpeak.gz` and `tagAlign` files
@@ -649,3 +653,27 @@ For each of these wrappers, make sure you fill in the appropriate variables at t
 * [align\_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and
   contigs
 * [merge\_atac\_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats
+
+### 6.2 Generate tissue-specific consensus merged peak * count matrix
+
+If you have a bunch of outputs from the atac-seq pipeline performed on all tissues but interested in generating tissue specific consensus merged peak * counts matrix. Run the below steps instead of running it from the post-processing wrapper after organizing the pipeline outputs to generate consensus peak-count matrix for the tissue of interest.
+
+```bash
+1. Generate a list of Peak files for the specific tissue of interest on which the consensus peak * counts matrix needs to be generated. Below is an example for lung
+ls ~/test_mnt/pass1ac-06/Output/final/peak/Rat-Lung*overlap.optimal_peak.narrowPeak.gz >lung_list.txt
+
+2. Generate output folder
+mkdir -p ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks
+
+3. Combine the peaks, truncate the peaks and merge all the peaks to perform the consensus peak matrix
+for i in `cat lung_list.txt`;do cat $i >>~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.bed.gz;done
+python3 ~/motrpac-atac-seq-pipeline/src/truncate_narrowpeak_200bp_summit.py \
+--infile ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.bed.gz \
+--outfile ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.bed.gz
+zcat ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.bed.gz | bedtools sort | bedtools merge > ~/test_mnt/pass1ac-06/Output/split_by_tissue/lung/merged_peaks/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed
+
+4. Generate the final consensus peaks * counts matrix for your tissue of interest, lung in this case. Please make sure to review the script and make changes matching to the exact tissue name and code to the local results_dir and tag_align variables in the script.
+bash encode_to_count_matrix_split_by_tissue.sh ~/test_mnt/PASS/atac-seq/rn7 ~/motrpac-atac-seq-pipeline/src `pwd`/batch.txt 3 pass1ac-06/Output/split_by_tissue/lung 0 &>pass1ac-06_rn7_counts_lung.txt
+
+```
+

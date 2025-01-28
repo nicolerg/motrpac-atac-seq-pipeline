@@ -636,7 +636,7 @@ Use the pipeline post-processing wrapper scripts to organize pipeline outputs, g
 Below post-processing wrappers can be used to perform post-processing of the atac-seq pipeline outputs starting from data organization to generating the consensus peak*counts matrix for all tissues combined together in the animal and human study respectively. The purpose of generating consensus peak * counts matrix across all tissues together is to be able to have the same consesus merged peaks for comparison across all tissues. There will be peaks in the consensus peak matrix which are tissue specific and therefore have zero counts in other tissues but non-zero in the tissue in which the gene is expressed.
 
 * [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for PASS animal studies
-* [atac-seq-human-wrapper.sh](src/atac-post-porcess-human-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for human study
+* [atac-seq-human-wrapper.sh](src/atac-post-process-human-wrapper.sh): wrapper script to generate QC report and final count matrix across all tissues for human study
 
 For each of these wrappers, make sure you fill in the appropriate variables at the top of the script before running.
 
@@ -644,7 +644,7 @@ For each of these wrappers, make sure you fill in the appropriate variables at t
 
 * [extract\_rep\_names\_from\_encode.sh](src/extract_rep_names_from_encode.sh): generate rep-to-viallabel map to
   interpret QC report
-* [pass\_extract\_atac\_from\_gcp.sh](src/pass_extract_atac_from_gcp.sh): download relevant files for PASS samples from ENCODE pipeline outputs
+* [extract\_atac\_from\_gcp\_pass.sh](src/extract_atac_from_gcp_pass.sh): download relevant files for PASS samples from ENCODE pipeline outputs
 * [human\_extract\_atac\_from\_gcp.sh](src/extract_atac_from_gcp_human.sh): download relevant files for human samples from ENCODE pipeline outputs
 * [encode\_to\_count\_matrix.sh](src/encode_to_count_matrix.sh): use `narrowkpeak.gz` and `tagAlign` files to generate a
   peak x sample raw counts matrix for PASS samples
